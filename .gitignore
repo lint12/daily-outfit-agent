@@ -31,6 +31,10 @@ ENV/
 env/
 .venv
 
+# Secrets
+*.secrets.yaml
+fastagent.secrets.yaml
+
 # IDE
 .vscode/
 .idea/
