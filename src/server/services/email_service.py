@@ -72,79 +72,146 @@ class EmailService:
         Returns:
             HTML content for email
         """
+        # Season-specific color schemes
+        season_colors = {
+            "winter": {
+                "bg": "#E3F2FD",           # Soft icy blue
+                "bubble": "rgba(255, 255, 255, 0.75)",  # Transparent white
+                "accent": "#1976D2",        # Deep blue
+                "name": "Winter"
+            },
+            "spring": {
+                "bg": "#F1F8E9",           # Soft sage green
+                "bubble": "rgba(255, 255, 255, 0.75)",
+                "accent": "#388E3C",        # Forest green
+                "name": "Spring"
+            },
+            "summer": {
+                "bg": "#FFF8E1",           # Warm cream/sunshine
+                "bubble": "rgba(255, 255, 255, 0.75)",
+                "accent": "#F57C00",        # Warm orange
+                "name": "Summer"
+            },
+            "fall": {
+                "bg": "#FBE9E7",           # Warm peachy terracotta
+                "bubble": "rgba(255, 255, 255, 0.75)",
+                "accent": "#D84315",        # Deep rust/terracotta
+                "name": "Fall"
+            }
+        }
+        colors = season_colors.get(season.lower(), season_colors["fall"])
+        
+        # Split recommendation into paragraphs for better visual separation
+        paragraphs = [p.strip() for p in outfit_recommendation.split('\n\n') if p.strip()]
+        
+        # Section headings that match the expected structure
+        headings = [
+            "The Look",
+            "The Details", 
+            "Where to Shop",
+            "Switch It Up"  # For alternatives
+        ]
+        
+        # Create HTML message bubbles for each paragraph
+        bubbles_html = ""
+        for i, paragraph in enumerate(paragraphs):
+            heading = headings[i] if i < len(headings) else f"Part {i+1}"
+            bubbles_html += f"""
+            <div class="message-bubble">
+                <div class="bubble-heading">{heading}</div>
+                <div class="bubble-text">{paragraph}</div>
+            </div>"""
+        
         return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        * {{
+            box-sizing: border-box;
+        }}
         body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: {colors['bg']};
+            line-height: 1.4;
+        }}
+        .messages-container {{
             max-width: 600px;
             margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }}
-        .container {{
-            background-color: #ffffff;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background-color: {colors['bg']};
+            min-height: 100vh;
         }}
         .header {{
+            background-color: #ffffff;
+            padding: 20px;
             text-align: center;
-            border-bottom: 3px solid #4a90e2;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
+            border-bottom: 1px solid #e5e5ea;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }}
-        .header h1 {{
-            margin: 0;
-            color: #2c3e50;
-            font-size: 28px;
-        }}
-        .season-badge {{
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            margin-top: 10px;
+        .contact-name {{
+            font-size: 16px;
             font-weight: 600;
+            color: #000000;
+            margin: 0 0 4px 0;
         }}
-        .outfit-content {{
-            white-space: pre-wrap;
-            font-size: 15px;
-            line-height: 1.8;
-            text-align: left;
-        }}
-        .footer {{
-            text-align: center;
-            color: #95a5a6;
+        .contact-subtitle {{
             font-size: 12px;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #ecf0f1;
+            color: #8e8e93;
+            margin: 0;
+        }}
+        .messages-area {{
+            padding: 20px 16px 80px 16px;
+        }}
+        .timestamp {{
+            text-align: center;
+            color: #8e8e93;
+            font-size: 12px;
+            margin: 20px 0 15px 0;
+            font-weight: 400;
+        }}
+        .message-bubble {{
+            background-color: {colors['bubble']};
+            border-radius: 20px;
+            padding: 16px 18px;
+            margin: 10px 0;
+            max-width: 90%;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }}
+        .bubble-heading {{
+            font-size: 10px;
+            font-weight: 600;
+            color: {colors['accent']};
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            opacity: 0.85;
+        }}
+        .bubble-text {{
+            font-size: 15px;
+            color: #1c1c1e;
+            line-height: 1.5;
+            margin: 0;
         }}
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="messages-container">
         <div class="header">
-            <h1>👔 Your Personalized Outfit</h1>
-            <div class="season-badge">{season.upper()} COLLECTION</div>
-            <div style="color: #7f8c8d; font-size: 14px; margin-top: 10px;">{date_str}</div>
+            <div class="contact-name">Your Stylist</div>
+            <div class="contact-subtitle">{season.title()} Vibes</div>
         </div>
         
-        <div class="outfit-content">
-{outfit_recommendation}
-        </div>
-        
-        <div class="footer">
-            Created by Your Personal AI Stylist<br>
-            Powered by Outfit Inspiration Agent
+        <div class="messages-area">
+            <div class="timestamp">{date_str}</div>
+{bubbles_html}
         </div>
     </div>
 </body>
@@ -179,8 +246,8 @@ class EmailService:
                         Created by Your Personal AI Stylist
                         """
         
-        # Set subject
-        email_subject = subject or f"👔 Your Personalized {season.title()} Outfit - {date_str}"
+        # Set subject - text message style
+        email_subject = subject or f"💬 Your Stylist"
         
         # Send using the simple email method
         return self.send_simple_email(html_content, text_content, email_subject)
